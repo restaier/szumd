@@ -1,0 +1,1214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>医学理论学习智能体·慢性胃炎模型制作</title>
+  <style>
+    :root{
+      /* ===== 基础配色（深色科技风） ===== */
+      --bg0:#0b1220;
+      --bg1:#0f172a;
+      --panel:#111c32;
+      --panel2:#0f1a2f;
+      --left:#0b1427;
+      --right:#101b31;
+
+      --line: rgba(255,255,255,.10);
+      --line2: rgba(255,255,255,.14);
+
+      --text:#f8fafc;
+      --muted:#94a3b8;
+
+      --ok:#10b981;
+      --okGlow: rgba(16,185,129,.35);
+      --bad:#ef4444;
+      --badGlow: rgba(239,68,68,.35);
+
+      --btn:#3b82f6;
+      --btnHover:#2563eb;
+      --btn2: rgba(255,255,255,.08);
+      --btn2Hover: rgba(255,255,255,.14);
+
+      --shadow: 0 14px 34px rgba(0,0,0,.45);
+      --r: 18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial;
+      color: var(--text);
+      min-height: 100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding: 18px;
+      background:
+        radial-gradient(900px 600px at 18% 10%, rgba(59,130,246,.25), transparent 60%),
+        radial-gradient(900px 600px at 88% 70%, rgba(16,185,129,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .app{
+      width: min(1380px, 100%);
+      height: min(780px, 92vh);
+      display:grid;
+      grid-template-columns: 300px 1fr 360px;
+      gap: 16px;
+    }
+    @media (max-width: 1100px){
+      .app{grid-template-columns: 280px 1fr; grid-template-rows:auto auto; height:auto;}
+      .right{grid-column:1/-1}
+    }
+    @media (max-width: 760px){
+      .app{grid-template-columns: 1fr;}
+      .left{order:1}
+      .center{order:2}
+      .right{order:3}
+    }
+
+    .col{
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    }
+
+    /* ===== 左侧 ===== */
+    .taskPill{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 18px;
+      min-width: 180px;
+      font-size: 12px;
+      font-weight: 1000;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(59,130,246,.16);
+      color: #dbeafe;
+      cursor: pointer;
+      box-shadow: inset 0 0 12px rgba(59,130,246,.12);
+      transition: transform .12s ease, filter .12s ease, background .12s ease;
+    }
+    .taskPill:hover{
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      background: rgba(59,130,246,.22);
+    }
+
+    .left{
+      background: linear-gradient(180deg, rgba(59,130,246,.10), rgba(0,0,0,.20));
+      padding: 22px 16px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed rgba(255,255,255,.18);
+    }
+    .logo{
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(59,130,246,1), rgba(139,92,246,1));
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 1000;
+      letter-spacing:.5px;
+      box-shadow: 0 8px 18px rgba(59,130,246,.35);
+      user-select:none;
+    }
+    .brandTxt{
+      display:flex; flex-direction:column; gap:2px;
+      line-height:1.2;
+    }
+    .brandTxt b{font-size: 14px; letter-spacing:.5px;}
+    .brandTxt span{font-size: 12px; color: var(--muted);}
+
+    .mainTitle{
+      font-weight: 1000;
+      font-size: 26px;
+      line-height: 1.25;
+      letter-spacing: .6px;
+      color: #ffffff;
+      text-shadow: 0 10px 30px rgba(59,130,246,.25);
+      margin-top: 4px;
+    }
+
+    .subNav{display:flex; flex-direction:column; gap:10px; margin-top: 4px;}
+    .navItem{
+      padding: 12px 14px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      font-weight: 900;
+      display:flex; align-items:center; gap:10px;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .navItem .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: rgba(255,255,255,.22);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.06);
+    }
+    .navItem.active{
+      background: rgba(59,130,246,.15);
+      border-color: rgba(59,130,246,.40);
+      color: #9bd2ff;
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 18px rgba(59,130,246,.10);
+    }
+    .navItem.active .dot{
+      background: rgba(59,130,246,.95);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.18);
+    }
+    .navItem.locked{opacity:.45}
+    .navItem.passed{
+      background: rgba(16,185,129,.10);
+      border-color: rgba(16,185,129,.30);
+      color:#7ff0c7;
+    }
+    .navItem.passed .dot{
+      background: rgba(16,185,129,.95);
+      box-shadow: 0 0 0 4px rgba(16,185,129,.16);
+    }
+
+    .courseInfo{
+      margin-top:auto;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 14px 14px;
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.9;
+    }
+    .courseInfo b{color:#fff}
+    .hint{
+      margin-top: 10px;
+      background: rgba(0,0,0,.24);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height:1.6;
+    }
+
+    /* ===== 中间 ===== */
+    .center{
+      background:
+        radial-gradient(800px 600px at 50% -10%, rgba(59,130,246,.16), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.16));
+      padding: 22px 26px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      position:relative;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .center::-webkit-scrollbar{
+      width: 0;
+      height: 0;
+    }
+    .center > *{position:relative; z-index:1}
+
+    .centerTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .chips{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .chip{
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .chip.green{
+      border-color: rgba(16,185,129,.28);
+      background: rgba(16,185,129,.12);
+      color:#82f2c9;
+    }
+
+    .stepper{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      margin-top: 4px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.14);
+    }
+    .step{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:1;
+      min-width: 0;
+    }
+    .bubble{
+      width: 30px; height: 30px;
+      border-radius: 10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 1000;
+      color: var(--muted);
+      user-select:none;
+    }
+    .step.active .bubble{
+      border-color: rgba(59,130,246,.55);
+      background: rgba(59,130,246,.18);
+      color:#bfe4ff;
+      box-shadow: 0 0 0 4px rgba(59,130,246,.12);
+    }
+    .step.done .bubble{
+      border-color: rgba(16,185,129,.55);
+      background: rgba(16,185,129,.16);
+      color:#b8ffdf;
+      box-shadow: 0 0 0 4px rgba(16,185,129,.12);
+    }
+    .stepLabel{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .line{
+      height: 2px;
+      background: rgba(255,255,255,.08);
+      flex:1;
+      border-radius: 999px;
+    }
+
+    .levelTitle{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      margin-top: 4px;
+      font-size: 28px;
+      font-weight: 1000;
+      color:#fff;
+    }
+    .levelTitle::before{
+      content:"";
+      width: 6px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--btn);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.12);
+    }
+
+    .inline-result{
+      margin: 2px 0 10px 0;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      display:flex;
+      align-items:center;
+      gap: 14px;
+    }
+    .inline-result.ok{
+      border-color: rgba(16,185,129,.35);
+      box-shadow: 0 0 0 4px rgba(16,185,129,.10);
+    }
+    .inline-result.bad{
+      border-color: rgba(239,68,68,.35);
+      box-shadow: 0 0 0 4px rgba(239,68,68,.10);
+    }
+
+    .small-light{
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.14);
+      box-shadow: inset 0 0 0 8px rgba(0,0,0,.35);
+      background: radial-gradient(circle at 30% 30%, #cbd5e1 0%, #64748b 55%, #0b1220 100%);
+      flex: 0 0 auto;
+    }
+    @keyframes blinkGlow {
+      0%,100%{filter:brightness(1); transform: scale(1);}
+      50%{filter:brightness(1.25); transform: scale(1.05);}
+    }
+    .small-light.ok{
+      background: radial-gradient(circle at 30% 30%, #6ee7b7 0%, var(--ok) 55%, #064e3b 100%);
+      box-shadow: inset 0 0 0 8px rgba(0,0,0,.35), 0 0 22px var(--okGlow);
+      animation: blinkGlow .55s ease-in-out 2;
+    }
+    .small-light.bad{
+      background: radial-gradient(circle at 30% 30%, #fca5a5 0%, var(--bad) 55%, #7f1d1d 100%);
+      box-shadow: inset 0 0 0 8px rgba(0,0,0,.35), 0 0 22px var(--badGlow);
+      animation: blinkGlow .55s ease-in-out 2;
+    }
+    .inline-text .t{
+      font-size: 15px;
+      font-weight: 1000;
+      margin:0;
+      color:#fff;
+      letter-spacing:.3px;
+    }
+    .inline-text .s{
+      margin:6px 0 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,.20);
+    }
+    .qText{
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.65;
+      margin: 0 0 14px 0;
+      color:#fff;
+    }
+    textarea{
+      width:100%;
+      min-height: 220px;
+      box-sizing: border-box;
+      padding: 18px 20px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.30);
+      color:yellow;
+      outline:none;
+      border-radius: 18px;
+      resize: vertical;
+      font-size: 28px;
+      line-height: 1.7;
+      font-family: inherit;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    textarea:focus{
+      border-color: rgba(59,130,246,.55);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.14);
+    }
+    textarea:disabled{opacity:.60; cursor:not-allowed}
+
+    .btnRow{
+      display:flex;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-top: 16px;
+      align-items:center;
+    }
+    button{
+      border:0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 1000;
+      font-size: 14px;
+      color:#fff;
+      cursor:pointer;
+      transition: transform .12s ease, filter .12s ease, background .12s ease;
+      user-select:none;
+    }
+    .btnPrimary{
+      background: linear-gradient(135deg, var(--btn), var(--btnHover));
+      box-shadow: 0 10px 18px rgba(59,130,246,.25);
+    }
+    .btnPrimary:hover:not(:disabled){transform: translateY(-1px); filter: brightness(1.05);}
+    .btnGhost{
+      background: var(--btn2);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:none;
+    }
+    .btnGhost:hover:not(:disabled){background: var(--btn2Hover);}
+    button:disabled{opacity:.55; cursor:not-allowed; transform:none; filter:none}
+
+    .note{
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .note.warn{color:#ffb4b4}
+
+    .footerTip{
+      margin-top:auto;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.12);
+    }
+
+    /* ===== 右侧 ===== */
+    .right{
+      background:
+        radial-gradient(800px 500px at 30% 0%, rgba(59,130,246,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.16));
+      padding: 22px 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      overflow:auto;
+    }
+    .rightTitle{
+      font-size: 18px;
+      font-weight: 1000;
+      margin:0;
+    }
+    .rightSub{
+      color: var(--muted);
+      font-size: 12px;
+      line-height:1.55;
+      margin-top:-6px;
+    }
+    .pillRow{display:flex; gap:8px; flex-wrap:wrap}
+    .pill{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #cbd5e1;
+      font-weight: 900;
+    }
+
+    .bars{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .barWrap{}
+    .barTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+    .bar{
+      height: 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07);
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;
+      width:0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(59,130,246,.95), rgba(16,185,129,.95));
+      transition: width .35s ease;
+    }
+
+    .block{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .blockTitle{
+      font-weight: 1000;
+      margin-bottom: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .mini{font-size: 12px; color: var(--muted); font-weight: 900;}
+
+    .list{display:flex; flex-direction:column; gap:10px;}
+    .item{
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 900;
+      color:#cbd5e1;
+    }
+    .tagOk{color:#7ff0c7}
+    .tagNo{color:#ffb4b4}
+
+    /* ===== 资源页 ===== */
+    .resTitle{font-size: 20px; font-weight: 1000; margin:0 0 8px 0;}
+    .resDesc{font-size: 13px; color:#cbd5e1; line-height:1.65; margin:0 0 14px 0;}
+    a.linkBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.14);
+      color:#fff;
+      font-weight: 1000;
+      transition: filter .12s ease, transform .12s ease, background .12s ease;
+    }
+    a.linkBtn:hover{filter: brightness(1.05); transform: translateY(-1px); background: rgba(255,255,255,.16);}
+    .videoBox{
+      margin-top: 10px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      background: #000;
+      max-height: 360px;
+    }
+
+    .videoBox video{
+      width: 100%;
+      max-height: 360px;
+      display: block;
+      outline: none;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .toast{
+      position: fixed;
+      left:50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,.92);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display:none;
+      max-width: min(760px, 92vw);
+      font-size: 13px;
+      z-index: 9999;
+    }
+    .toast.show{display:block}
+
+    kbd{
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.14);
+      border-bottom-color: rgba(255,255,255,.08);
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #dbeafe;
+      font-weight: 900;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="toast" id="toast"></div>
+
+  <div class="app">
+    <div class="col left">
+      <div class="brand">
+        <div class="logo">ML</div>
+        <div class="brandTxt">
+          <b>医学理论学习智能体</b>
+          <span>Medical Theory Learning Agent</span>
+        </div>
+      </div>
+      <button class="taskPill" id="btnTaskPill">探究式学习任务</button>
+      <div class="mainTitle">慢性胃炎模型制作</div>
+
+      <div class="subNav" id="subNav"></div>
+      <div class="courseInfo">
+        <div><b>所属课程：</b>医学实验动物学</div>
+        <div><b>教学模块：</b>慢性胃炎模型制作</div>
+        <div><b>面向对象：</b>临床/基础医学本科</div>
+      </div>
+
+      <div class="hint">
+        <b>提示</b>：学习进度存于浏览器缓存<br/>
+        刷新不丢失，清理缓存会重置进度。
+      </div>
+    </div>
+
+    <div class="col center" id="centerPanel"></div>
+    <div class="col right" id="rightPanel"></div>
+  </div>
+
+<script>
+const CONTENT = {
+  levels: [
+    { id: 1, name: "第一关", short: "系统定位", question: "胃炎属于哪个系统的疾病？", rule: { type: "any", keywords: ["消化系统"] }, resourceId: "res1" },
+    { id: 2, name: "第二关", short: "概念理解", question: "什么是胃炎？", rule: { type: "atLeast", k: 2, keywords: ["胃黏膜","炎症","感染","药物","酒精","自身免疫","因素","引起"] }, resourceId: "res2" },
+    { id: 3, name: "第三关", short: "模型意义", question: "为什么要进行慢性胃炎模型制作？", rule: { type: "atLeast", k: 2, keywords: ["可控","发病机制","机制","发展过程","测试","开发","预防","诊断","治疗","桥梁","临床","实验室"] }, resourceId: "res3" }
+  ],
+  resources: {
+  res1: {
+    title: "资源1：消化系统疾病的动物模型（课件）",
+    desc: "学习消化系统基础，明确胃在人体中的位置与作用。",
+    pptUrl: "lesson1.pptx",
+    videoTitle: "配套视频：消化系统疾病的动物模型",
+    videoUrl: "video1.mp4"
+  },
+  res2: {
+    title: "资源2：慢性胃炎模型制作基础（课件）",
+    desc: "学习胃炎的医学定义、常见致病诱因及典型临床症状。",
+    pptUrl: "lesson2.pptx",
+    videoTitle: "配套视频：慢性胃炎模型制作",
+    videoUrl: "video2.mp4"
+  },
+  res3: {
+    title: "资源3：慢性胃炎模型制作意义",
+    desc: "了解构建动物模型的必要性：连接基础研究与临床应用的桥梁。",
+    pptUrl: "lesson3.pptx",
+    videoTitle: "配套视频：慢性胃炎模型制作意义",
+    videoUrl: "video3.mp4"
+  }
+}
+};
+
+const KEY = "medlab_gastritis_ui_v5";
+function loadState(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function saveState(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
+function initState(){
+  return {
+    view: "quiz",
+    level: 1,
+    score: 0,
+    attempts: {1:0,2:0,3:0},
+    wrongs: {1:0,2:0,3:0},
+    lockedLevel: null,
+    resourceDone: {res1:false,res2:false,res3:false},
+    msg: "正在等待您的作答…",
+    delayMs: 1200
+  };
+}
+let state = loadState() || initState();
+let isTransitioning = false;
+
+const centerPanel = document.getElementById("centerPanel");
+const rightPanel = document.getElementById("rightPanel");
+const subNavPanel = document.getElementById("subNav");
+const toast = document.getElementById("toast");
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(()=>toast.classList.remove("show"), 2200);
+}
+
+/* 新增：对中文文件名做 URL 编码，保证线上访问资源更稳 */
+function assetUrl(path){
+  if(!path) return "";
+  if (/^(https?:)?\/\//i.test(path) || path.startsWith("data:") || path.startsWith("blob:")) {
+    return path;
+  }
+  return path
+    .split("/")
+    .map(seg => encodeURIComponent(seg))
+    .join("/");
+}
+
+function norm(s){ return (s||"").toLowerCase().replace(/\s+/g,"").replace(/[，。！？、,.!?]/g,""); }
+function matchCount(answer, keywords){
+  const a = norm(answer);
+  let hit = 0;
+  for(const kw of keywords){
+    if(a.includes(norm(kw))) hit++;
+  }
+  return hit;
+}
+function grade(levelObj, answer){
+  const rule = levelObj.rule;
+  if(rule.type === "any") return matchCount(answer, rule.keywords) >= 1;
+  if(rule.type === "atLeast") return matchCount(answer, rule.keywords) >= rule.k;
+  return false;
+}
+
+function progressLevels(){
+  if(state.view === "done") return 100;
+  const total = CONTENT.levels.length;
+  const passed = Math.max(0, Math.min(state.level - 1, total));
+  return Math.round(passed / total * 100);
+}
+function progressResources(){
+  const total = Object.keys(state.resourceDone).length;
+  const done = Object.values(state.resourceDone).filter(Boolean).length;
+  return total ? Math.round(done / total * 100) : 0;
+}
+function progressOverall(){
+  if(state.view === "done") return 100;
+  return Math.round(progressLevels()*0.7 + progressResources()*0.3);
+}
+
+function renderLeft(){
+  const isDone = (state.view === "done");
+  subNavPanel.innerHTML = `
+    <div class="navItem ${!isDone ? "active" : "passed"}">
+      <span class="dot"></span> 理论基础知识
+    </div>
+    <div class="navItem ${isDone ? "active" : "locked"}">
+      <span class="dot"></span> 结果分析与考核
+    </div>
+  `;
+}
+
+function renderRight(){
+  const totalAttempts = Object.values(state.attempts).reduce((a,b)=>a+b,0);
+  const totalWrongs = Object.values(state.wrongs).reduce((a,b)=>a+b,0);
+  const lockedTxt = state.lockedLevel ? `锁定第${state.lockedLevel}关` : "畅通";
+
+  const pAll = progressOverall();
+  const pLv = progressLevels();
+  const pRes = progressResources();
+
+  const resMap = [
+    {k:"res1", label:"资源1：消化系统简介", done: state.resourceDone.res1},
+    {k:"res2", label:"资源2：胃炎概述", done: state.resourceDone.res2},
+    {k:"res3", label:"资源3：慢性胃炎模型制作意义", done: state.resourceDone.res3}
+  ];
+
+  rightPanel.innerHTML = `
+    <h2 class="rightTitle">终端控制台</h2>
+    <div class="rightSub">实时记录：关卡进度、答题统计、资源完成情况。</div>
+
+    <div class="bars">
+      <div class="barWrap">
+        <div class="barTop"><span>综合完成度</span><b>${pAll}%</b></div>
+        <div class="bar"><div class="fill" style="width:${pAll}%"></div></div>
+      </div>
+      <div class="barWrap">
+        <div class="barTop"><span>关卡完成度</span><b>${pLv}%</b></div>
+        <div class="bar"><div class="fill" style="width:${pLv}%"></div></div>
+      </div>
+      <div class="barWrap">
+        <div class="barTop"><span>资源完成度</span><b>${pRes}%</b></div>
+        <div class="bar"><div class="fill" style="width:${pRes}%"></div></div>
+      </div>
+    </div>
+
+    <div class="pillRow">
+      <div class="pill">当前关：<b>${state.level}</b>/3</div>
+      <div class="pill">提交：<b>${totalAttempts}</b></div>
+      <div class="pill">失误：<b>${totalWrongs}</b></div>
+      <div class="pill">状态：<b style="color:${state.lockedLevel ? "#ffb4b4":"#7ff0c7"}">${lockedTxt}</b></div>
+    </div>
+
+    <div class="block">
+      <div class="blockTitle">
+        <span>每关统计</span>
+        <span class="mini">提交 / 错误提交</span>
+      </div>
+      <div class="list">
+        <div class="item"><span>第1关</span><span>${state.attempts[1]} / ${state.wrongs[1]}</span></div>
+        <div class="item"><span>第2关</span><span>${state.attempts[2]} / ${state.wrongs[2]}</span></div>
+        <div class="item"><span>第3关</span><span>${state.attempts[3]} / ${state.wrongs[3]}</span></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="blockTitle">
+        <span>资源学习情况</span>
+        <span class="mini">完成后解锁</span>
+      </div>
+      <div class="list">
+        ${resMap.map(r=>`
+          <div class="item">
+            <span>${r.label}</span>
+            <span class="${r.done ? "tagOk":"tagNo"}">${r.done ? "达标":"⏳ 待学习"}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderCenter(){
+  if(state.view === "quiz") return renderQuiz();
+  if(state.view === "resource") return renderResource();
+  if(state.view === "done") return renderDone();
+  renderQuiz();
+}
+
+function renderStepper(){
+  const current = state.level;
+  const allDone = (state.view === "done");
+
+  const steps = CONTENT.levels.map(l => {
+    const isDone = allDone || (l.id < current);
+    const isActive = !allDone && (l.id === current);
+    const cls = isDone ? "done" : (isActive ? "active" : "");
+    const bubbleText = isDone ? "✓" : String(l.id);
+
+    return `
+      <div class="step ${cls}">
+        <div class="bubble">${bubbleText}</div>
+        <div class="stepLabel">${l.short}</div>
+      </div>
+    `;
+  });
+
+  const withLines = [];
+  for(let i=0;i<steps.length;i++){
+    withLines.push(steps[i]);
+    if(i<steps.length-1) withLines.push(`<div class="line"></div>`);
+  }
+  return `<div class="stepper">${withLines.join("")}</div>`;
+}
+
+function setInlineNeutral(isLocked){
+  const box = document.getElementById("inlineResult");
+  const light = document.getElementById("inlineLight");
+  const title = document.getElementById("inlineTitle");
+  const sub = document.getElementById("inlineSub");
+  if(!box || !light || !title || !sub) return;
+
+  box.classList.remove("ok","bad");
+  light.className = "small-light";
+  if(isLocked){
+    box.classList.add("bad");
+    light.classList.add("bad");
+    title.textContent = "作答权限被锁定";
+    sub.textContent = "请先完成本关对应资源学习，然后点击“学完解锁”。";
+  }else{
+    title.textContent = "等待作答";
+    sub.textContent = "请输入答案后点击提交验证。支持关键词判定。";
+  }
+}
+
+function showInlineResult(ok){
+  const box = document.getElementById("inlineResult");
+  const light = document.getElementById("inlineLight");
+  const title = document.getElementById("inlineTitle");
+  const sub = document.getElementById("inlineSub");
+  if(!box || !light || !title || !sub) return;
+
+  box.classList.remove("ok","bad");
+  light.className = "small-light";
+
+  if(ok){
+    box.classList.add("ok");
+    light.classList.add("ok");
+    title.textContent = "回答正确";
+    sub.textContent = "即将进入下一关…";
+  }else{
+    box.classList.add("bad");
+    light.classList.add("bad");
+    title.textContent = "回答错误";
+    sub.textContent = "请先学习对应资源，然后返回再答。";
+  }
+}
+
+function renderQuiz(){
+  const L = CONTENT.levels.find(x=>x.id===state.level);
+  const isLocked = (state.lockedLevel === state.level);
+  const disableInput = isLocked || isTransitioning;
+
+  centerPanel.innerHTML = `
+    <div class="centerTop">
+      <div>理论基础挑战考核</div>
+      <div class="chips">
+        <div class="chip">课程：医学实验动物学</div>
+        <div class="chip green">模块：慢性胃炎模型制作</div>
+      </div>
+    </div>
+
+    ${renderStepper()}
+
+    <div class="levelTitle">${L.name}</div>
+
+    <div id="inlineResult" class="inline-result">
+      <div id="inlineLight" class="small-light"></div>
+      <div class="inline-text">
+        <p id="inlineTitle" class="t">等待作答</p>
+        <p id="inlineSub" class="s">请输入答案后点击提交验证。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="qText">${L.question}</p>
+      <textarea id="ans" placeholder="${isLocked ? '🔒 当前关卡已锁定，请先查阅并完成对应资源学习...' : '✍️ 请在此输入您的解答要点（建议2-3点），完成后提交验证。'}" ${disableInput ? "disabled":""}></textarea>
+
+      <div class="btnRow">
+        <button class="btnPrimary" id="btnSubmit" ${disableInput ? "disabled":""}>${isTransitioning ? "系统验证中..." : "提交并验证"}</button>
+        <button class="btnGhost" id="btnRes" ${isTransitioning ? "disabled":""}>学习资源</button>
+        <div style="flex:1"></div>
+        <button class="btnGhost" id="btnHelp" ${isTransitioning ? "disabled":""}>使用说明</button>
+      </div>
+
+      ${isLocked
+        ? `<div class="note warn">⚠️ 当前关卡已锁定：需完成对应资源学习后才可再次提交。</div>`
+        : `<div class="note">小技巧：按 <kbd>Ctrl</kbd> + <kbd>Enter</kbd> 可快速提交。</div>`
+      }
+    </div>
+
+    <div class="footerTip">🕒 ${escapeHtml(state.msg)}</div>
+  `;
+
+  setInlineNeutral(isLocked);
+
+  document.getElementById("btnRes").onclick = ()=>{
+    if(isTransitioning) return;
+    state.view = "resource";
+    saveState(state);
+    rerender();
+  };
+
+  document.getElementById("btnHelp").onclick = ()=>{
+    showToast("答对：本页显示提示后自动进入下一关；答错：进入资源页学习并解锁后再答。");
+  };
+
+  const btnSubmit = document.getElementById("btnSubmit");
+  if(btnSubmit){
+    btnSubmit.onclick = ()=>{
+      const ans = document.getElementById("ans").value || "";
+      submitAnswer(L, ans);
+    };
+  }
+
+  const ansEl = document.getElementById("ans");
+  if(ansEl){
+    ansEl.addEventListener("keydown", (e)=>{
+      if(e.ctrlKey && e.key === "Enter"){
+        e.preventDefault();
+        if(!disableInput) btnSubmit.click();
+      }
+    });
+  }
+}
+
+function renderResource(){
+  const L = CONTENT.levels.find(x=>x.id===state.level);
+  const R = CONTENT.resources[L.resourceId];
+
+  const pptHref = assetUrl(R.pptUrl);
+  const videoSrc = assetUrl(R.videoUrl);
+
+  const pptBtn = R.pptUrl
+    ? `<a class="linkBtn" href="${escapeAttr(pptHref)}" target="_blank" rel="noopener">📄 打开课件（PPT）</a>`
+    : `<a class="linkBtn" href="javascript:void(0)" onclick="alert('请在 CONTENT.resources 中填写 pptUrl')">📄 课件未配置</a>`;
+
+  const videoHtml = R.videoUrl
+    ? `
+      <div class="videoBox">
+        <video controls preload="metadata" playsinline>
+          <source src="${escapeAttr(videoSrc)}" type="video/mp4">
+          当前浏览器不支持 video 标签。
+        </video>
+      </div>
+    `
+    : `<div class="videoBox" style="padding:36px 16px; color: var(--muted); text-align:center;">暂无视频资源（请配置 videoUrl）</div>`;
+
+  centerPanel.innerHTML = `
+    <div class="centerTop">
+      <div>资源学习库</div>
+      <div class="chips">
+        <div class="chip">对应关卡：${L.name}</div>
+        <div class="chip green">完成后解锁</div>
+      </div>
+    </div>
+
+    ${renderStepper()}
+
+    <div class="levelTitle">${L.name} · 资源</div>
+
+    <div class="card">
+      <div class="resTitle">${escapeHtml(R.title)}</div>
+      <div class="resDesc">${escapeHtml(R.desc)}</div>
+
+      <div class="btnRow" style="margin-top: 0;">
+        ${pptBtn}
+        <button class="btnGhost" id="btnBack">返回答题</button>
+        <div style="flex:1"></div>
+        <button class="btnPrimary" id="btnDone">学完解锁</button>
+      </div>
+
+      <div class="note" style="margin-top:10px; font-weight: 900; color:#dbeafe;">▶ ${escapeHtml(R.videoTitle)}</div>
+      ${videoHtml}
+
+      <div class="note">
+        说明：如果你是答错进入资源页，必须点击“学完解锁”才能重新提交。
+        （本前端版不做强制视频看完检测，如需可再加。）
+      </div>
+    </div>
+
+    <div class="footerTip">🕒 ${escapeHtml(state.msg)}</div>
+  `;
+
+  document.getElementById("btnBack").onclick = ()=>{
+    state.view = "quiz";
+    saveState(state);
+    rerender();
+  };
+
+  document.getElementById("btnDone").onclick = ()=>{
+    state.resourceDone[L.resourceId] = true;
+    if(state.lockedLevel === state.level) state.lockedLevel = null;
+    state.msg = "资源学习已登记，已解锁，可返回重新作答。";
+    state.view = "quiz";
+    saveState(state);
+    rerender();
+    showToast("已解锁该关卡。");
+  };
+}
+
+function renderDone(){
+  const totalAttempts = Object.values(state.attempts).reduce((a,b)=>a+b,0);
+  const totalWrongs = Object.values(state.wrongs).reduce((a,b)=>a+b,0);
+
+  let rank = "S级（理论大师）";
+  if(totalWrongs > 0) rank = "A级（优秀）";
+  if(totalWrongs >= 3) rank = "B级（良好）";
+
+  centerPanel.innerHTML = `
+    <div class="centerTop">
+      <div>结果分析与考核</div>
+      <div class="chips">
+        <div class="chip green">已通关</div>
+        <div class="chip">综合：${progressOverall()}%</div>
+      </div>
+    </div>
+
+    ${renderStepper()}
+
+    <div class="card" style="text-align:center; padding: 28px 18px;">
+      <div style="font-size: 30px; font-weight: 1000; color:#7ff0c7;">🎉 恭喜通关</div>
+      <div style="font-size: 74px; font-weight: 1000; margin: 8px 0; text-shadow: 0 10px 30px rgba(59,130,246,.25);">
+        ${state.score}<span style="font-size: 22px; color: var(--muted);"> 分</span>
+      </div>
+      <div style="color: var(--muted); font-weight: 900; margin-bottom: 18px;">
+        您已完成慢性胃炎模型制作的理论基础闯关。
+      </div>
+
+      <div style="max-width: 520px; margin: 0 auto; text-align:left; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.18); border-radius: 16px; padding: 16px;">
+        <div style="font-weight:1000; margin-bottom: 10px;">📊 学习总结</div>
+        <div style="display:flex; justify-content:space-between; color: var(--muted); font-weight:900; margin-bottom:8px;">
+          <span>总提交次数</span><span style="color:#fff">${totalAttempts}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; color: var(--muted); font-weight:900; margin-bottom:8px;">
+          <span>总失误次数</span><span style="color:#fff">${totalWrongs}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; color: var(--muted); font-weight:900; margin-bottom:8px;">
+          <span>资源完成度</span><span style="color:#fff">${progressResources()}%</span>
+        </div>
+        <div style="margin-top: 12px; padding-top: 12px; border-top:1px dashed rgba(255,255,255,.14); display:flex; justify-content:space-between; font-weight:1000;">
+          <span>综合评价</span><span style="color:#9bd2ff">${rank}</span>
+        </div>
+      </div>
+
+      <div class="btnRow" style="justify-content:center; margin-top: 18px;">
+        <button class="btnPrimary" id="btnReview">回到第一关温习</button>
+        <button class="btnGhost" id="btnRestart">清空数据重来</button>
+      </div>
+    </div>
+
+    <div class="footerTip">🕒 ${escapeHtml(state.msg)}</div>
+  `;
+
+  document.getElementById("btnRestart").onclick = ()=>{
+    state = initState();
+    saveState(state);
+    rerender();
+    showToast("已清空并重置。");
+  };
+  document.getElementById("btnReview").onclick = ()=>{
+    state.level = 1;
+    state.view = "quiz";
+    state.lockedLevel = null;
+    state.msg = "已回到第一关，可重新温习。";
+    saveState(state);
+    rerender();
+  };
+}
+
+function submitAnswer(levelObj, answer){
+  if(state.lockedLevel === state.level) return;
+  if(isTransitioning) return;
+
+  state.attempts[state.level]++;
+  isTransitioning = true;
+
+  const ansEl = document.getElementById("ans");
+  const btnSubmit = document.getElementById("btnSubmit");
+  const btnRes = document.getElementById("btnRes");
+  const btnHelp = document.getElementById("btnHelp");
+  if(ansEl) ansEl.disabled = true;
+  if(btnSubmit) btnSubmit.disabled = true;
+  if(btnRes) btnRes.disabled = true;
+  if(btnHelp) btnHelp.disabled = true;
+
+  state.msg = "系统判定中…";
+  saveState(state);
+
+  const ok = grade(levelObj, answer);
+  showInlineResult(ok);
+
+  setTimeout(()=>{
+    if(ok){
+      if(state.level < 3){
+        state.level++;
+        state.view = "quiz";
+        state.msg = "系统已准备就绪，请输入答案。";
+      }else{
+        state.score = 100;
+        state.view = "done";
+        state.msg = "通关完成。";
+      }
+    }else{
+      state.wrongs[state.level]++;
+      state.lockedLevel = state.level;
+      state.view = "resource";
+      state.msg = "系统已锁定该关：请查阅资料并解锁后再答。";
+    }
+
+    isTransitioning = false;
+    saveState(state);
+    rerender();
+  }, state.delayMs);
+}
+
+function rerender(){
+  renderLeft();
+  renderCenter();
+  renderRight();
+}
+rerender();
+
+function escapeHtml(str){
+  return (str ?? "").toString()
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+function escapeAttr(str){
+  return escapeHtml(str).replaceAll("`","&#096;");
+}
+</script>
+</body>
+</html>
